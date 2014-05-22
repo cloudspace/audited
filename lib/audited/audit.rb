@@ -11,7 +11,7 @@ module Audited
         belongs_to :user,       :polymorphic => true
         belongs_to :associated, :polymorphic => true
 
-        before_create :set_version_number, :set_audit_user
+        before_create :validate_auditable, :set_version_number, :set_audit_user
 
         cattr_accessor :audited_class_names
         self.audited_class_names = Set.new
@@ -86,6 +86,10 @@ module Audited
     end
 
     private
+    def validate_auditable
+      raise "Auditable model was null" unless auditable_id && auditable_type
+    end
+
     def set_version_number
       max = self.class.where(
         :auditable_id => auditable_id,
